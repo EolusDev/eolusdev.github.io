@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sparrow Wallet 中文汉化版 · 完整中文化的比特币桌面钱包</title>
+<meta name="description" content="Sparrow Wallet 完整中文汉化项目：基于官方 v2.5.4，绿色便携、纯 Python 一键构建、字典可扩展、可回滚。下载中文便携版，或给本机英文版一键打补丁。">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* ============ 设计 token ============ */
+:root{
+  --bg:#0E1013;
+  --bg-2:#12151A;
+  --surface:#171B21;
+  --surface-2:#1E232B;
+  --surface-3:#262C36;
+  --line:rgba(232,234,237,.09);
+  --line-strong:rgba(232,234,237,.16);
+  --text:#E8EAED;
+  --text-dim:#98A1AB;
+  --text-faint:#6B747F;
+  --accent:#F7931A;
+  --accent-deep:#D97E0B;
+  --accent-soft:rgba(247,147,26,.12);
+  --accent-line:rgba(247,147,26,.35);
+  --radius:14px;
+  --radius-sm:9px;
+  --font-display:'Space Grotesk','Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  --font-body:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono','Cascadia Mono',Consolas,'Courier New',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+::selection{background:var(--accent);color:#0E1013}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font-family:inherit}
+
+/* ============ 通用 ============ */
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+.section{padding:88px 0;position:relative}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:12.5px;letter-spacing:.14em;
+  color:var(--accent);text-transform:uppercase;
+}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--accent-line)}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(26px,3.4vw,38px);
+  font-weight:700;letter-spacing:-.01em;
+  line-height:1.25;margin-top:14px;
+}
+.section-sub{
+  color:var(--text-dim);max-width:640px;margin-top:12px;font-size:15.5px;
+}
+.grid{display:grid;gap:20px}
+.hairline-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 0%,#000 20%,transparent 75%);
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 0%,#000 20%,transparent 75%);
+}
+
+/* ============ 导航 ============ */
+.site-nav{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(12px);
+  background:rgba(14,16,19,.78);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{display:flex;align-items:center;gap:28px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15.5px;letter-spacing:.01em}
+.brand .btc-badge{
+  width:30px;height:30px;border-radius:8px;flex:none;
+  display:grid;place-items:center;
+  background:var(--accent);color:#0E1013;
+}
+.nav-links{display:flex;align-items:center;gap:24px;margin-left:auto}
+.nav-links a{font-size:14px;color:var(--text-dim);transition:color .15s}
+.nav-links a:hover{color:var(--text)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  height:44px;padding:0 20px;border-radius:var(--radius-sm);
+  font-size:14.5px;font-weight:700;letter-spacing:.01em;
+  border:1px solid transparent;cursor:pointer;transition:all .16s ease;
+  white-space:nowrap;
+}
+.btn svg{width:17px;height:17px;flex:none}
+.btn-primary{background:var(--accent);color:#0E1013}
+.btn-primary:hover{background:var(--accent-deep);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--line-strong)}
+.btn-ghost:hover{border-color:var(--accent-line);color:var(--accent)}
+
+/* ============ Hero ============ */
+.hero{
+  position:relative;overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background-image:url("https://aka.doubaocdn.com/s/8tyD56UxCG");
+  background-size:cover;background-position:center;
+}
+.hero-bg::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(14,16,19,.96) 0%,rgba(14,16,19,.82) 38%,rgba(14,16,19,.42) 62%,rgba(14,16,19,.72) 100%);
+}
+.hero-inner{
+  position:relative;z-index:1;
+  padding:104px 0 116px;
+  display:grid;grid-template-columns:1.25fr .9fr;gap:48px;align-items:center;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:12.5px;letter-spacing:.14em;
+  color:var(--accent);text-transform:uppercase;
+}
+.hero-eyebrow::before{content:"";width:26px;height:1px;background:var(--accent)}
+.hero h1{
+  font-family:var(--font-display);
+  font-size:clamp(38px,5.6vw,62px);
+  font-weight:700;line-height:1.12;letter-spacing:-.015em;
+  margin:20px 0 18px;
+}
+.hero h1 .accent-word{color:var(--accent)}
+.hero-lead{
+  color:var(--text-dim);font-size:17px;max-width:560px;
+}
+.hero-lead strong{color:var(--text);font-weight:500}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+.hero-meta{
+  display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:26px;
+  font-family:var(--font-mono);font-size:12.5px;color:var(--text-faint);
+}
+.hero-meta span{display:inline-flex;align-items:center;gap:7px}
+.hero-meta .dot{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+
+/* 签名元素：汉化对照区块 */
+.translate-strip{
+  display:grid;gap:12px;justify-items:stretch;
+}
+.tcard{
+  background:rgba(23,27,33,.82);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 16px;
+  display:grid;grid-template-columns:auto 30px 1fr;gap:14px;align-items:center;
+  backdrop-filter:blur(8px);
+  transition:border-color .2s ease, transform .2s ease;
+}
+.tcard:hover{border-color:var(--accent-line);transform:translateX(3px)}
+.tcard .lang{font-size:13.5px;color:var(--text-dim);width:38px}
+.tcard .en{font-family:var(--font-mono);font-size:16px;font-weight:500;color:var(--text)}
+.tcard .arr{color:var(--accent);display:grid;place-items:center}
+.tcard .arr svg{width:17px;height:17px}
+.tcard .zh{font-size:16px;font-weight:700;color:var(--accent)}
+.tcard .meta{
+  grid-column:1/-1;font-family:var(--font-mono);font-size:11px;
+  color:var(--text-faint);letter-spacing:.04em;padding-top:8px;border-top:1px dashed var(--line);
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+
+/* ============ 版本条 ============ */
+.release-bar{border-bottom:1px solid var(--line);background:var(--bg-2)}
+.release-inner{
+  display:flex;flex-wrap:wrap;align-items:center;gap:16px 32px;
+  padding:22px 0;font-family:var(--font-mono);font-size:13px;
+}
+.release-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid var(--accent-line);
+  padding:7px 14px;border-radius:999px;font-weight:500;font-size:12.5px;
+}
+.release-tag .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.release-info{display:flex;flex-wrap:wrap;gap:8px 26px;color:var(--text-dim)}
+.release-info b{color:var(--text);font-weight:500}
+.release-cta{margin-left:auto}
+.release-cta .btn{height:40px;font-size:13.5px}
+
+/* ============ 三种使用方式 ============ */
+.usage-cards{grid-template-columns:repeat(3,1fr);margin-top:44px}
+.usage-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:30px 26px;
+  display:flex;flex-direction:column;gap:0;
+  position:relative;overflow:hidden;
+  transition:border-color .2s ease, transform .2s ease;
+}
+.usage-card:hover{border-color:var(--accent-line);transform:translateY(-3px)}
+.usage-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 70%);
+  opacity:0;transition:opacity .2s;
+}
+.usage-card:hover::before{opacity:1}
+.usage-no{
+  font-family:var(--font-mono);font-size:12px;color:var(--accent);
+  letter-spacing:.12em;margin-bottom:18px;
+}
+.usage-icon{
+  width:46px;height:46px;border-radius:12px;
+  background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;margin-bottom:20px;
+}
+.usage-icon svg{width:22px;height:22px}
+.usage-card h3{font-size:19px;font-weight:700;margin-bottom:10px;letter-spacing:-.01em}
+.usage-card p{font-size:14px;color:var(--text-dim);margin-bottom:20px;flex:1}
+.usage-tag{
+  display:inline-block;font-size:11.5px;font-family:var(--font-mono);
+  color:var(--text-faint);border:1px solid var(--line-strong);
+  border-radius:6px;padding:4px 9px;margin-bottom:16px;align-self:flex-start;
+}
+.usage-link{
+  display:inline-flex;align-items:center;gap:7px;
+  color:var(--accent);font-size:14px;font-weight:700;
+}
+.usage-link svg{width:15px;height:15px;transition:transform .15s}
+.usage-link:hover svg{transform:translateX(3px)}
+
+/* ============ 特性数据 ============ */
+.features{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats{
+  grid-template-columns:repeat(4,1fr);margin-top:46px;gap:14px;
+}
+.stat{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:24px 22px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.stat .num{
+  font-family:var(--font-display);font-size:clamp(26px,3vw,34px);
+  font-weight:700;color:var(--accent);line-height:1.1;
+  font-variant-numeric:tabular-nums;
+}
+.stat .num small{font-size:.55em;color:var(--text-dim);font-weight:500;margin-left:2px}
+.stat .lbl{font-size:13px;color:var(--text-dim)}
+.stat .note{font-size:11.5px;color:var(--text-faint);font-family:var(--font-mono)}
+.features-note{
+  margin-top:26px;display:flex;align-items:center;gap:10px;
+  font-size:13.5px;color:var(--text-dim);
+}
+.features-note svg{width:16px;height:16px;color:var(--accent);flex:none}
+
+/* ============ 升级工作流 ============ */
+.steps{display:grid;gap:0;margin-top:46px;counter-reset:step}
+.step{
+  display:grid;grid-template-columns:56px 1fr;gap:22px;
+  padding:22px 0;border-bottom:1px solid var(--line);position:relative;
+}
+.step:last-child{border-bottom:none}
+.step::before{
+  counter-increment:step;content:counter(step,decimal-leading-zero);
+  width:56px;height:56px;border-radius:14px;
+  background:var(--surface-2);border:1px solid var(--line);
+  display:grid;place-items:center;
+  font-family:var(--font-mono);font-size:15px;color:var(--accent);
+}
+.step h3{font-size:17px;font-weight:700;margin-bottom:7px}
+.step p{font-size:14.5px;color:var(--text-dim);max-width:720px}
+.step code{
+  font-family:var(--font-mono);font-size:13px;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+  border-radius:6px;padding:1px 7px;white-space:nowrap;
+}
+.step .cli{
+  display:block;margin-top:10px;font-family:var(--font-mono);font-size:13px;
+  color:var(--text-dim);background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;padding:10px 14px;overflow-x:auto;white-space:nowrap;
+}
+.step .cli .pmt{color:var(--accent)}
+
+/* ============ 术语口径 ============ */
+.terms-grid{grid-template-columns:1fr 1fr;margin-top:44px;gap:20px}
+.terms-col{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:28px 26px;
+}
+.terms-col h3{font-size:16px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.terms-col h3 svg{width:18px;height:18px;flex:none}
+.terms-col .hint{font-size:13px;color:var(--text-faint);margin-bottom:18px}
+.terms-col.keep h3{color:var(--text)}
+.terms-col.keep h3 svg{color:var(--text-dim)}
+.terms-col.translate h3{color:var(--accent)}
+.terms-col.translate h3 svg{color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-family:var(--font-mono);font-size:12.5px;
+  border:1px solid var(--line-strong);border-radius:7px;
+  padding:5px 11px;color:var(--text-dim);background:var(--bg-2);
+}
+.trans-pairs{display:flex;flex-direction:column;gap:0}
+.trans-pair{
+  display:flex;align-items:center;gap:14px;padding:9px 0;
+  border-bottom:1px dashed var(--line);font-size:14.5px;
+}
+.trans-pair:last-child{border-bottom:none}
+.trans-pair .en{font-family:var(--font-mono);color:var(--text);width:110px;flex:none}
+.trans-pair .arrow{color:var(--accent);flex:none}
+.trans-pair .cn{font-weight:700;color:var(--accent)}
+
+/* ============ 技术原理 ============ */
+.how{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.how-cards{grid-template-columns:repeat(4,1fr);margin-top:44px}
+.how-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 22px;display:flex;flex-direction:column;gap:12px;
+  transition:border-color .2s;
+}
+.how-card:hover{border-color:var(--accent-line)}
+.how-step{font-family:var(--font-mono);font-size:12px;color:var(--accent);letter-spacing:.1em}
+.how-card h3{font-size:15.5px;font-weight:700}
+.how-card p{font-size:13.5px;color:var(--text-dim)}
+.how-mono{
+  margin-top:30px;background:var(--bg);border:1px solid var(--line);
+  border-radius:var(--radius);padding:20px 24px;
+  font-family:var(--font-mono);font-size:13px;color:var(--text-dim);
+  display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;
+}
+.how-mono .ok{color:var(--accent);font-weight:500}
+.how-mono svg{width:15px;height:15px;color:var(--accent);flex:none}
+
+/* ============ 限制与免责 ============ */
+.notes-grid{grid-template-columns:1fr 1fr;margin-top:44px;gap:20px}
+.note-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:30px 28px;
+}
+.note-card h3{font-size:17px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:11px}
+.note-card h3 svg{width:19px;height:19px;color:var(--accent);flex:none}
+.note-list{list-style:none;display:flex;flex-direction:column;gap:14px}
+.note-list li{display:grid;grid-template-columns:auto 1fr;gap:12px;font-size:14px;color:var(--text-dim)}
+.note-list .idx{
+  font-family:var(--font-mono);font-size:12px;color:var(--accent);
+  border:1px solid var(--accent-line);border-radius:6px;
+  width:26px;height:26px;display:grid;place-items:center;margin-top:1px;
+}
+.disclaim{
+  margin-top:20px;background:var(--accent-soft);border:1px solid var(--accent-line);
+  border-radius:var(--radius);padding:22px 26px;
+  font-size:13.5px;color:var(--text-dim);
+}
+.disclaim b{color:var(--accent)}
+
+/* ============ Footer ============ */
+.site-footer{border-top:1px solid var(--line);padding:54px 0 60px;background:var(--bg-2)}
+.footer-inner{display:flex;flex-wrap:wrap;gap:34px;justify-content:space-between;align-items:flex-start}
+.footer-brand{max-width:340px}
+.footer-brand .brand{margin-bottom:14px}
+.footer-brand p{font-size:13px;color:var(--text-faint)}
+.footer-links{display:flex;gap:64px;flex-wrap:wrap}
+.footer-col h4{
+  font-size:12.5px;font-family:var(--font-mono);letter-spacing:.12em;
+  color:var(--text-faint);text-transform:uppercase;margin-bottom:16px;
+}
+.footer-col a{
+  display:flex;align-items:center;gap:9px;font-size:14px;color:var(--text-dim);
+  padding:6px 0;transition:color .15s;
+}
+.footer-col a:hover{color:var(--accent)}
+.footer-col a svg{width:15px;height:15px;flex:none}
+.footer-bottom{
+  margin-top:44px;padding-top:24px;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:10px 28px;justify-content:space-between;
+  font-size:12.5px;color:var(--text-faint);font-family:var(--font-mono);
+}
+
+/* ============ 响应式 ============ */
+@media (max-width:980px){
+  .hero-inner{grid-template-columns:1fr;padding:72px 0 84px}
+  .translate-strip{max-width:480px}
+  .usage-cards{grid-template-columns:1fr;max-width:520px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .how-cards{grid-template-columns:repeat(2,1fr)}
+  .terms-grid,.notes-grid{grid-template-columns:1fr}
+  .release-cta{margin-left:0}
+}
+@media (max-width:640px){
+  .section{padding:64px 0}
+  .nav-links{display:none}
+  .stats{grid-template-columns:repeat(2,1fr);gap:10px}
+  .how-cards{grid-template-columns:1fr}
+  .hero-cta .btn{flex:1 1 auto;padding:0 14px}
+  .step{grid-template-columns:44px 1fr;gap:16px}
+  .step::before{width:44px;height:44px;font-size:13px}
+  .footer-links{gap:36px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 导航 ============ -->
+<header class="site-nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#hero">
+      <span class="btc-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.3 7.8h3.4a2.5 2.5 0 1 1 0 5H9.3z"/><path d="M9.3 12.8h4.1a2.5 2.5 0 1 1 0 5H9.3z"/><path d="M11.5 5.8v2.6m0 5.4v4.4"/></svg>
+      </span>
+      Sparrow Wallet 中文版
+    </a>
+    <nav class="nav-links">
+      <a href="#usage">使用方式</a>
+      <a href="#features">汉化数据</a>
+      <a href="#upgrade">版本升级</a>
+      <a href="#how">技术原理</a>
+      <a class="btn btn-primary" href="https://github.com/EolusDev/sparrow-zh/releases/download/v2.5.4-zh.1/Sparrow-2.5.4-.zip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+        下载便携版
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ Hero ============ -->
+<section class="hero" id="hero">
+  <div class="hero-bg" role="img" aria-label="比特币主题背景"></div>
+  <div class="wrap hero-inner">
+    <div>
+      <span class="hero-eyebrow">Sparrow Wallet · 简体中文汉化项目</span>
+      <h1>完整中文的<br><span class="accent-word">Sparrow Wallet</span></h1>
+      <p class="hero-lead">
+        比特币桌面钱包的<strong>全量中文化版本</strong>。基于官方 v2.5.4，
+        界面文字 100% 硬编码在程序内部，本项目通过改写运行时镜像实现
+        <strong>完整汉化</strong>——绿色便携、任意路径可运行、
+        纯 Python 一键构建、可回滚。
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://github.com/EolusDev/sparrow-zh/releases/download/v2.5.4-zh.1/Sparrow-2.5.4-.zip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+          下载中文便携版 v2.5.4
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/EolusDev/sparrow-zh">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85V21c0 .27.18.58.69.48A10 10 0 0 0 22 12 10 10 0 0 0 12 2z"/></svg>
+          查看 GitHub 仓库
+        </a>
+      </div>
+      <div class="hero-meta">
+        <span><i class="dot"></i>非官方汉化，不改动钱包功能</span>
+        <span><i class="dot"></i>免安装 · 免联网 · 免 JDK</span>
+        <span><i class="dot"></i>Apache 2.0 衍生</span>
+      </div>
+    </div>
+
+    <!-- 签名元素：界面文案就地汉化 -->
+    <div class="translate-strip" aria-hidden="true">
+      <div class="tcard">
+        <span class="lang">EN</span>
+        <span class="en">Settings</span>
+        <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg></span>
+        <span class="zh">设置</span>
+        <span class="meta"><span>FXML · promptText</span><span>0x5072 0x6F 0x6D 0x70 …</span></span>
+      </div>
+      <div class="tcard">
+        <span class="lang">EN</span>
+        <span class="en">Send</span>
+        <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg></span>
+        <span class="zh">发送</span>
+        <span class="meta"><span>Java 常量池 · Utf8</span><span>0x5345 0x4E 0x44 → 0x53 0x65 0x6E 0x64</span></span>
+      </div>
+      <div class="tcard">
+        <span class="lang">EN</span>
+        <span class="en">Receive</span>
+        <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg></span>
+        <span class="zh">接收</span>
+        <span class="meta"><span>标识符不动 · 仅改界面文字</span><span>jimage 完美哈希 0 失配</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 版本条 ============ -->
+<section class="release-bar">
+  <div class="wrap release-inner">
+    <span class="release-tag"><i class="live-dot"></i>最新 v2.5.4-zh.1</span>
+    <div class="release-info">
+      <span>基于官方 <b>Sparrow v2.5.4</b></span>
+      <span>发布于 <b>2026-09-06</b></span>
+      <span>便携包 <b>约 93 MB</b></span>
+    </div>
+    <div class="release-cta">
+      <a class="btn btn-ghost" href="https://github.com/EolusDev/sparrow-zh/releases/tag/v2.5.4-zh.1">
+        Release 详情
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7m0 0H8m9 0v9"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 三种使用方式 ============ -->
+<section class="section" id="usage">
+  <div class="hairline-grid"></div>
+  <div class="wrap">
+    <span class="eyebrow">按需选择</span>
+    <h2 class="section-title">三种使用方式</h2>
+    <p class="section-sub">从「开箱即用」到「跨版本重建」，按你的场景选择。</p>
+
+    <div class="grid usage-cards">
+      <article class="usage-card">
+        <span class="usage-no">方式一 · 最省事</span>
+        <div class="usage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></div>
+        <h3>直接下载中文便携版</h3>
+        <p>适合普通用户。下载便携包，解压到任意目录（中文、空格路径均可），双击 <code>Sparrow.exe</code> 即为完整中文界面。</p>
+        <span class="usage-tag">免安装 · 免联网 · 免运行环境</span>
+        <a class="usage-link" href="https://github.com/EolusDev/sparrow-zh/releases/download/v2.5.4-zh.1/Sparrow-2.5.4-.zip">
+          下载 Sparrow-2.5.4-中文便携版.zip
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg>
+        </a>
+      </article>
+
+      <article class="usage-card">
+        <span class="usage-no">方式二 · 一键打补丁</span>
+        <div class="usage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg></div>
+        <h3>给已装的英文版汉化</h3>
+        <p>本机已装官方英文 Sparrow？双击 <code>中文补丁\一键汉化.bat</code>，把安装文件夹拖进窗口，自动汉化并保留原始镜像，可一键还原。</p>
+        <span class="usage-tag">需 Python 3.8+ · 自动探测安装目录</span>
+        <a class="usage-link" href="https://github.com/EolusDev/sparrow-zh#readme">
+          查看一键汉化说明
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg>
+        </a>
+      </article>
+
+      <article class="usage-card">
+        <span class="usage-no">方式三 · 进阶 / 开发者</span>
+        <div class="usage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M7 9l3 3-3 3M12 15h5"/></svg></div>
+        <h3>命令行一键构建</h3>
+        <p>对任意原版 Sparrow 重建汉化镜像并直接装回，支持跨版本。纯 Python 标准库，无需 JDK，可复现、可校验。</p>
+        <span class="usage-tag">build.py · 解包→翻译→重建→校验</span>
+        <a class="usage-link" href="https://github.com/EolusDev/sparrow-zh#方式三命令行一键构建进阶--跨版本--开发者">
+          查看 build.py 用法
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg>
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 汉化数据 ============ -->
+<section class="section features" id="features">
+  <div class="wrap">
+    <span class="eyebrow">汉化范围 · 实测数据</span>
+    <h2 class="section-title">不是机翻，是逐界面审定</h2>
+    <p class="section-sub">31 个界面布局文件、439 个 Java 类，共 2444 处界面文字中文化，人工分批审定，构建产物经过完美哈希全量校验。</p>
+
+    <div class="grid stats">
+      <div class="stat">
+        <span class="num">31<small>个</small></span>
+        <span class="lbl">FXML 界面布局文件</span>
+        <span class="note">其中 27 个被改写</span>
+      </div>
+      <div class="stat">
+        <span class="num">439<small>个</small></span>
+        <span class="lbl">Java 类完成汉化</span>
+        <span class="note">2444 处界面文字替换</span>
+      </div>
+      <div class="stat">
+        <span class="num">2359<small>条</small></span>
+        <span class="lbl">人工审定翻译字典</span>
+        <span class="note">9 个分批字典自动合并</span>
+      </div>
+      <div class="stat">
+        <span class="num">20481<small>字</small></span>
+        <span class="lbl">成品镜像中文字符</span>
+        <span class="note">477 个资源含中文</span>
+      </div>
+      <div class="stat">
+        <span class="num">0<small>失配</small></span>
+        <span class="lbl">57359 个资源完美哈希</span>
+        <span class="note">jimage 重建字节级一致</span>
+      </div>
+      <div class="stat">
+        <span class="num">24<small>款</small></span>
+        <span class="lbl">硬件钱包导入向导</span>
+        <span class="note">含多签、Payjoin 等全界面</span>
+      </div>
+      <div class="stat">
+        <span class="num">100<small>%</small></span>
+        <span class="lbl">纯 Python 标准库</span>
+        <span class="note">不依赖 JDK 可复现构建</span>
+      </div>
+      <div class="stat">
+        <span class="num">SHA256<small></small></span>
+        <span class="lbl">确定性构建交叉验证</span>
+        <span class="note">同一镜像 + 字典，产物字节一致</span>
+      </div>
+    </div>
+
+    <div class="features-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+      汉化只改界面显示文字，不改钱包数据与任何加密 / 签名逻辑。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 官方升级工作流 ============ -->
+<section class="section" id="upgrade">
+  <div class="wrap">
+    <span class="eyebrow">官方升级后怎么办</span>
+    <h2 class="section-title">新版出来，无需逆向重做</h2>
+    <p class="section-sub">工具链与版本号无关。官方 Sparrow 升级后，按以下四步即可重新生成新版中文版。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div>
+          <h3>安装新版原版 Sparrow</h3>
+          <p>安装官方新版，取得其 <code>runtime\lib\modules</code> 镜像文件。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>用现有字典重建</h3>
+          <p>对新的镜像运行 <code>build.py</code>，绝大部分界面文字沿用现有 2359 条字典（分批字典自动合并）。</p>
+          <code class="cli"><span class="pmt">$</span> python 中文补丁/patch/脚本/build.py --src "D:\Sparrow" --install</code>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>扫描未覆盖的英文字面量</h3>
+          <p>运行 <code>scan_remaining.py</code>，找出新版里尚未翻译的可见英文文案。</p>
+          <code class="cli"><span class="pmt">$</span> python 中文补丁/patch/脚本/scan_remaining.py</code>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>补字典并重跑，校验通过即完成</h3>
+          <p>把新增文案补进对应分批字典，重跑 <code>build.py</code>，自动完成解包、翻译、重建与哈希校验。</p>
+          <p class="section-sub" style="margin-top:10px">注意：与外部值比较的字符串（协议判断、过滤排序、SQL、日志）<strong style="color:var(--text)">不可翻译</strong>，判别口径见仓库 <code>安装说明.md</code>。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 术语口径 ============ -->
+<section class="section" id="terms">
+  <div class="wrap">
+    <span class="eyebrow">术语口径</span>
+    <h2 class="section-title">该保留的保留，该翻译的翻译</h2>
+    <div class="grid terms-grid">
+      <div class="terms-col keep">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+          专业术语保留英文
+        </h3>
+        <p class="hint">避免歧义，与生态术语保持一致</p>
+        <div class="chips">
+          <span class="chip">Bitcoin</span><span class="chip">Taproot</span><span class="chip">Segwit</span>
+          <span class="chip">UTXO</span><span class="chip">PayNym</span><span class="chip">RBF</span>
+          <span class="chip">CPFP</span><span class="chip">PSBT</span><span class="chip">BIP39</span>
+          <span class="chip">BIP32</span><span class="chip">Tor</span><span class="chip">Electrum</span>
+          <span class="chip">Payjoin</span><span class="chip">Coldcard</span><span class="chip">Testnet</span>
+        </div>
+      </div>
+      <div class="terms-col translate">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M9 4v2m-5 0c2 5 6 8 11 10M6 12c1.5 2 3.5 3.5 6 4.5M15 19l2.5-6 2.5 6m-4-1.5h3"/></svg>
+          通用界面词译为中文
+        </h3>
+        <p class="hint">覆盖主界面、设置、交易、多签、硬件钱包等全部界面</p>
+        <div class="trans-pairs">
+          <div class="trans-pair"><span class="en">Address</span><span class="arrow">→</span><span class="cn">地址</span></div>
+          <div class="trans-pair"><span class="en">Balance</span><span class="arrow">→</span><span class="cn">余额</span></div>
+          <div class="trans-pair"><span class="en">Status</span><span class="arrow">→</span><span class="cn">状态</span></div>
+          <div class="trans-pair"><span class="en">Send</span><span class="arrow">→</span><span class="cn">发送</span></div>
+          <div class="trans-pair"><span class="en">Receive</span><span class="arrow">→</span><span class="cn">接收</span></div>
+          <div class="trans-pair"><span class="en">Settings</span><span class="arrow">→</span><span class="cn">设置</span></div>
+          <div class="trans-pair"><span class="en">Sign</span><span class="arrow">→</span><span class="cn">签名</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 技术原理 ============ -->
+<section class="section how" id="how">
+  <div class="wrap">
+    <span class="eyebrow">技术原理 · 就地改写 jimage</span>
+    <h2 class="section-title">不改字节码，只改界面文字</h2>
+    <p class="section-sub">Sparrow 由 jpackage 打包，字节码与资源都在 <code>runtime\lib\modules</code> 镜像里。构建管线分四步，全程纯 Python 标准库。</p>
+
+    <div class="grid how-cards">
+      <div class="how-card">
+        <span class="how-step">STEP 01</span>
+        <h3>解包镜像</h3>
+        <p>按 jimage 格式（小端、完美哈希、zlib 压缩块）纯 Python 解出 sparrow 模块。</p>
+      </div>
+      <div class="how-card">
+        <span class="how-step">STEP 02</span>
+        <h3>FXML 界面翻译</h3>
+        <p>替换 text / promptText / helpText 属性与可见文本节点，注释块移到文件尾。</p>
+      </div>
+      <div class="how-card">
+        <span class="how-step">STEP 03</span>
+        <h3>Java 常量池改写</h3>
+        <p>只替换未被类名 / 字段 / 方法引用的 Utf8 字面量，重建常量池，绝不动标识符与字节码逻辑。</p>
+      </div>
+      <div class="how-card">
+        <span class="how-step">STEP 04</span>
+        <h3>就地重建 + 校验</h3>
+        <p>保持哈希表与字符串表字节不变，全量检查完美哈希失配数（须为 0）并统计中文资源。</p>
+      </div>
+    </div>
+
+    <div class="how-mono">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+      <span>同一原始镜像 + 同一字典 → <span class="ok">构建产物字节一致</span>（SHA256 交叉验证）</span>
+      <span>曾尝试 jlink 整体重链接，因 JDK 小版本不兼容弃用，改用就地改写方案并通过实际启动验证</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 已知限制 & 免责声明 ============ -->
+<section class="section" id="notes">
+  <div class="wrap">
+    <span class="eyebrow">说明</span>
+    <h2 class="section-title">已知限制与免责声明</h2>
+    <div class="grid notes-grid">
+      <div class="note-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 12v4"/></svg>
+          已知限制
+        </h3>
+        <ul class="note-list">
+          <li><span class="idx">1</span><span>硬件卡底层协议错误、Electrum / Bitcoin Core 服务端日志、Tor 底层错误保留英文（仅日志 / 异常场景，不参与界面展示）。</span></li>
+          <li><span class="idx">2</span><span>汇率模块需联网，离线时日志出现 WARN 属正常现象，不影响功能。</span></li>
+          <li><span class="idx">3</span><span>汉化只改界面显示文字，不改钱包数据与任何加密 / 签名逻辑；正式使用前请备份钱包。</span></li>
+        </ul>
+      </div>
+      <div class="note-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+          免责声明
+        </h3>
+        <ul class="note-list">
+          <li><span class="idx">1</span><span>本项目为 Sparrow Wallet 的非官方汉化版本，与官方团队无关。</span></li>
+          <li><span class="idx">2</span><span>汉化仅修改界面文字，不改变任何钱包功能、加密逻辑与安全行为。</span></li>
+          <li><span class="idx">3</span><span>请自行评估风险并做好钱包备份；因使用本项目产生的损失作者不承担责任。</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="disclaim">
+      <b>SHA256 校验（Windows）：</b>
+      <code style="font-family:var(--font-mono);font-size:13px;word-break:break-all">certutil -hashfile "Sparrow-2.5.4-.zip" SHA256</code>
+      <span style="display:block;margin-top:8px">便携包校验值 <code style="font-family:var(--font-mono);font-size:12.5px;color:var(--accent)">49765018990A2FD17655FE76A134C1AEB1B900D8554DC7A25BEA072C28F8FF1F</code></span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ Footer ============ -->
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="#hero">
+        <span class="btc-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.3 7.8h3.4a2.5 2.5 0 1 1 0 5H9.3z"/><path d="M9.3 12.8h4.1a2.5 2.5 0 1 1 0 5H9.3z"/><path d="M11.5 5.8v2.6m0 5.4v4.4"/></svg>
+        </span>
+        Sparrow Wallet 中文汉化版
+      </a>
+      <p>基于官方 Sparrow Wallet（Apache License 2.0）的完整中文化衍生项目。非官方出品，仅修改界面文字，不改变任何钱包功能与安全行为。</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>项目</h4>
+        <a href="https://github.com/EolusDev/sparrow-zh">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85V21c0 .27.18.58.69.48A10 10 0 0 0 22 12 10 10 0 0 0 12 2z"/></svg>
+          源码仓库
+        </a>
+        <a href="https://github.com/EolusDev/sparrow-zh/releases">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+          Releases 下载
+        </a>
+        <a href="https://github.com/EolusDev/sparrow-zh/releases/tag/v2.5.4-zh.1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          最新版发布说明
+        </a>
+      </div>
+      <div class="footer-col">
+        <h4>相关</h4>
+        <a href="https://github.com/sparrowwallet/sparrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          官方 Sparrow Wallet
+        </a>
+        <a href="https://sparrowwallet.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9S14.5 18.5 12 21c-2.5-2.5-3.8-5.7-3.8-9S9.5 5.5 12 3z"/></svg>
+          官方网站
+        </a>
+        <a href="https://github.com/EolusDev/sparrow-zh/blob/main/LICENSE">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+          Apache License 2.0
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 EolusDev · Sparrow Wallet 中文汉化项目</span>
+    <span>衍生自 sparrowwallet/sparrow · 非官方版本</span>
+  </div>
+</footer>
+
+</body>
+</html>
