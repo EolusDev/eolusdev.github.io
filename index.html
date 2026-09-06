@@ -40,6 +40,22 @@ body{
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
+/* ============ Shader 动态背景 ============ */
+#shader-canvas{
+  position:fixed;inset:0;width:100%;height:100%;
+  z-index:0;pointer-events:none;display:block;
+}
+.shader-veil{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(14,16,19,.86) 0%,rgba(14,16,19,.72) 42%,rgba(14,16,19,.9) 100%);
+}
+main,.site-footer{position:relative;z-index:2}
+body.shader-on .hero-bg{background-image:none}
+body.shader-on .hero-bg::after{opacity:.45}
+@media (prefers-reduced-motion:reduce){
+  #shader-canvas{display:none}
+  .shader-veil{display:none}
+}
 ::selection{background:var(--accent);color:#0E1013}
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
@@ -406,6 +422,10 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
+
+<!-- ============ Shader 动态背景 ============ -->
+<canvas id="shader-canvas" aria-hidden="true"></canvas>
+<div class="shader-veil" aria-hidden="true"></div>
 
 <!-- ============ 导航 ============ -->
 <header class="site-nav">
@@ -817,6 +837,324 @@ button{font-family:inherit}
     <span>衍生自 sparrowwallet/sparrow · 非官方版本</span>
   </div>
 </footer>
+
+<script>
+/* ============ Shader 动态背景渲染器（WebGL2 · 移植自 Shadertoy 4fVGDK h_junction） ============ */
+(function(){
+  var canvas = document.getElementById('shader-canvas');
+  var veil = document.querySelector('.shader-veil');
+  if(!canvas || !veil || !window.WebGL2RenderingContext){ if(canvas)canvas.remove(); if(veil)veil.remove(); return; }
+  var gl = canvas.getContext('webgl2', {antialias:false, depth:false, stencil:false, alpha:false, preserveDrawingBuffer:true});
+  if(!gl){ canvas.remove(); veil.remove(); return; }
+
+  /* ---- GLSL 源码：原 shader 代码 + ES 3.00 封装 ---- */
+  var SRC = '#version 300 es\n' +
+'precision highp float;\n' +
+'precision highp sampler2D;\n' +
+'uniform vec3 iResolution;\n' +
+'uniform float iTime;\n' +
+'uniform sampler2D iChannel0;\n' +
+'uniform sampler2D iChannel1;\n' +
+'out vec4 fragColor;\n' +
+'void mainImage(out vec4 fragColor, in vec2 fragCoord);\n' +
+'\n' +
+'// for shadertoy\n' +
+'#define backbuffer iChannel0\n' +
+'#define resolution (iResolution.xy)\n' +
+'#define time iTime\n' +
+'#define saturate(x) clamp(x,.0,1.)\n' +
+'#define linearstep(edge0, edge1, x) saturate(((x) - (edge0)) / ((edge1) - (edge0)))\n' +
+'#define remap(x, a, b, c, d) mix(c, d, ((x) - (a)) / ((b) - (a)))\n' +
+'#define remapc(x, a, b, c, d) mix(c, d, linearstep(a, b, x))\n' +
+'float font(vec2 uv,vec2 id)\n' +
+'{\n' +
+'  uv=remapc(uv,vec2(0),vec2(1),id,id+1.)/16.;\n' +
+'  const float w=0.2;\n' +
+'  return smoothstep(.55,.45,textureGrad(iChannel1,uv,dFdx(uv),dFdy(uv)).a);\n' +
+'}\n' +
+'float pinieon(vec2 uv)\n' +
+'{\n' +
+'  uv=fract(uv);\n' +
+'  uv=.5+(uv-.5)*.8;\n' +
+'  vec2 ruv=uv*5.,fuv=fract(ruv),iuv=floor(ruv);\n' +
+'  vec2 id=vec2[3](vec2(1,12),vec2(15,13),vec2(2,12))[int(ruv.x+2.)%3];\n' +
+'  return font(.5+(fuv-.5)*.7,id)*float(iuv.y==2.)*step(0.5,iuv.x)*step(iuv.x,3.5);\n' +
+'}\n' +
+'float hjct(vec2 uv)\n' +
+'{\n' +
+'  uv=fract(uv);\n' +
+'  uv=.5+(uv-.5)*.8;\n' +
+'  vec2 ruv=uv*5.,fuv=fract(ruv),iuv=floor(ruv);\n' +
+'  vec2 id=vec2[3](vec2(1,12),vec2(15,13),vec2(2,12))[int(ruv.x+2.)%3];\n' +
+'  return font(.5+(fuv-.5)*.7,id)*float(iuv.y==2.)*step(0.5,iuv.x)*step(iuv.x,3.5);\n' +
+'}\n' +
+'#define sat(x) clamp(x,0,1)\n' +
+'#define norm(x) normalize(x)\n' +
+'#define rep(i,n) for(int i=0;i<n;i++)\n' +
+'const float pi=acos(-1.);\n' +
+'const float tau=2.*pi;\n' +
+'vec3 hash(vec3 x){uvec3 v=floatBitsToUint(x);v=v*20240413u+1212121212u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;v^=v>>16u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;return vec3(v)/float(-1u);}\n' +
+'mat2 rot(float a){float s=sin(a),c=cos(a);return mat2(c,s,-s,c);}\n' +
+'mat3 bnt(vec3 T){T=norm(T);vec3 N=vec3(0,1,0);vec3 B=norm(cross(N,T));N=norm(cross(T,B));return mat3(B,N,T);}\n' +
+'float iplane(vec3 ro,vec3 rd,vec3 pd,float w){pd=norm(pd);float l=-(dot(ro,pd)+w)/dot(rd,pd);return (l<0.?1e5:l);}\n' +
+'float bpm=125.;\n' +
+'float alt,lt,tr,bt;\n' +
+'#define sc(x) hash(vec3(1.2,x,bt))\n' +
+'float fui(vec2 suv,float s)\n' +
+'{\n' +
+'  s=1.2;\n' +
+'  suv-=alt*0.1;\n' +
+'  suv*=rot(floor(sc(3).x*4.)*pi/2.0);\n' +
+'  vec2 ruv=suv;\n' +
+'  rep(i,4)\n' +
+'  {\n' +
+'    if(hash(vec3(floor(ruv)+s,i)).x<0.5)ruv*=2.;\n' +
+'    else break;\n' +
+'  }\n' +
+'  vec3 h=hash(vec3(floor(ruv)+1.2,s));\n' +
+'  vec2 fuv=fract(ruv);\n' +
+'  float c=0.;\n' +
+'  float b=sc(0).x;\n' +
+'  vec2 au=abs((fuv*2.-1.)*rot(floor(h.z*4.)*pi/4.0));\n' +
+'  if(b<.2)\n' +
+'    c=pinieon(suv);\n' +
+'  else if(b<.4)\n' +
+'    c=step(fract(dot(vec2(1),suv)),.1);\n' +
+'  else\n' +
+'    c=step(max(au.x,au.y),.4)*step(min(au.x,au.y),.05)*step(h.x,.5);\n' +
+'  return c;\n' +
+'}\n' +
+'float march(vec3 ro,vec3 rd)\n' +
+'{\n' +
+'  int n=16;\n' +
+'  float l=1e9;\n' +
+'  rep(i,n)\n' +
+'  {\n' +
+'    float fi=(float(i)+.5)/float(n);\n' +
+'    vec3 pd=norm(tan(hash(vec3(bt,i,1.2))*2.-1.));\n' +
+'    if(sc(0).z<.3)\n' +
+'    {\n' +
+'      pd=vec3(0,0,1);\n' +
+'    }\n' +
+'    float w=mix(-5.,5.,fi);\n' +
+'    float d=iplane(ro,rd,pd,w);\n' +
+'    vec3 rp=rd*d+ro;\n' +
+'    vec2 uv=(rp.x*pd.zy+rp.y*pd.xz+rp.z*pd.xy)*0.5;\n' +
+'    float s=fui(uv,w);\n' +
+'    if(0.<s)l=min(l,d);\n' +
+'  }\n' +
+'  return l;\n' +
+'}\n' +
+'void mainImage(out vec4 fragColor, in vec2 fragCoord )\n' +
+'{\n' +
+'  vec2 fc=gl_FragCoord.xy,res=resolution;\n' +
+'  vec2 uv=fc/res,asp=res/min(res.x,res.y),asp2=res/max(res.x,res.y);\n' +
+'  alt=lt=time*bpm/60.0;\n' +
+'  tr=1.-exp(-3.*fract(lt));\n' +
+'  bt=floor(lt);\n' +
+'  lt=tr+bt;\n' +
+'  bool tomaru=int(bt/4.)%2==0;\n' +
+'  if(tomaru)\n' +
+'  {\n' +
+'    alt=lt=time*bpm/60.0/4.0;\n' +
+'    tr=fract(lt);bt=floor(lt);\n' +
+'  }\n' +
+'  vec2 suv=(uv*2.-1.)*asp;\n' +
+'  vec3 ro=vec3(0,0,-3),dir,rd;\n' +
+'  dir=-ro;\n' +
+'  float sc1y=sc(1).y;\n' +
+'  if(sc1y<.3)\n' +
+'  {\n' +
+'    ro=vec3(mix(-1.,1.,fract(alt)),0,-3);\n' +
+'    dir=vec3(0,0,1);\n' +
+'  }\n' +
+'  else if(sc1y<.6)\n' +
+'  {\n' +
+'    ro=vec3(0,0,mix(-5.,-3.,tr));\n' +
+'    dir=vec3(0,0,1);\n' +
+'  }\n' +
+'  else\n' +
+'  {\n' +
+'    float a=alt*.5;\n' +
+'    ro=vec3(cos(a),0,sin(a))*2.;\n' +
+'    dir=-ro;\n' +
+'  }\n' +
+'  float z=.5;\n' +
+'  if(sc(1).x<.3)z=mix(.3,1.7,tr);\n' +
+'  rd=norm(bnt(dir)*vec3(suv,z));\n' +
+'  float l=march(ro,rd);\n' +
+'  float c=exp(-0.2*l);\n' +
+'  if(sc(0).y<.2){\n' +
+'    c+=hjct(suv*0.5+.5+vec2(alt*0.5,0))*step(fract(alt*4.),.5);\n' +
+'    c*=step(abs(suv.y),.5);\n' +
+'  }\n' +
+'  if(sc(1).z<.3)\n' +
+'  {\n' +
+'    vec2 ruv=suv*4.;\n' +
+'    vec3 h=hash(vec3(floor(ruv),floor(alt*4.)));\n' +
+'    vec2 fuv=fract(ruv),au=abs((fuv*2.-1.)*rot(floor(h.z*4.)*pi/4.0));\n' +
+'    c+=step(max(au.x,au.y),.3)*step(min(au.x,au.y),.05)*step(h.x,.1);\n' +
+'  }\n' +
+'  if(tomaru)\n' +
+'  {\n' +
+'    float len=length(suv)-mix(.2,.8,tr);\n' +
+'    float nya=step(abs(len),.005);\n' +
+'    if(len<0.0)c=1.-c*1.5;\n' +
+'    c+=nya;\n' +
+'  }\n' +
+'  float ema=0.7;\n' +
+'  vec3 back=texture(backbuffer,uv).rgb;\n' +
+'  vec3 col=mix(vec3(c,back.rg*1.5),back,ema);\n' +
+'  fragColor=vec4(col,1);\n' +
+'}\n' +
+'void main(){ mainImage(fragColor, gl_FragCoord.xy); }\n';
+
+  function compile(type, src){
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+      console.error('[shader] compile error:', gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+  var vs = compile(gl.VERTEX_SHADER,
+    '#version 300 es\nvoid main(){vec2 p=vec2((gl_VertexID==1)?3.0:-1.0,(gl_VertexID==2)?3.0:-1.0);gl_Position=vec4(p,0.0,1.0);}');
+  var fs = compile(gl.FRAGMENT_SHADER, SRC);
+  if(!vs || !fs){ canvas.remove(); veil.remove(); return; }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+    console.error('[shader] link error:', gl.getProgramInfoLog(prog));
+    canvas.remove(); veil.remove(); return;
+  }
+  gl.useProgram(prog);
+  var uRes = gl.getUniformLocation(prog, 'iResolution');
+  var uTime = gl.getUniformLocation(prog, 'iTime');
+  var uCh0 = gl.getUniformLocation(prog, 'iChannel0');
+  var uCh1 = gl.getUniformLocation(prog, 'iChannel1');
+  var vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+
+  /* ---- 字体图集：运行时生成 16x16 Latin-1 网格（等价 Shadertoy font0 布局） ---- */
+  function makeFontAtlas(){
+    var grid = 16, cell = 128;
+    var c = document.createElement('canvas');
+    c.width = c.height = grid * cell;
+    var ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 ' + Math.round(cell * 0.72) + 'px Consolas,"Courier New",monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for(var row = 0; row < grid; row++){
+      for(var col = 0; col < grid; col++){
+        ctx.fillText(String.fromCharCode(row * 16 + col), (col + 0.5) * cell, (row + 0.5) * cell);
+      }
+    }
+    var tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    return tex;
+  }
+  var fontTex = makeFontAtlas();
+
+  /* ---- ping-pong 反馈缓冲（backbuffer = iChannel0） ---- */
+  function makeFB(w, h){
+    var tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    var fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    var ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    return {tex:tex, fbo:fbo, w:w, h:h, ok:ok};
+  }
+  var fbA = null, fbB = null, W = 0, H = 0, read = 0;
+  function ensureFB(w, h){
+    if(fbA && fbA.w === w && fbA.h === h) return;
+    fbA = makeFB(w, h);
+    fbB = makeFB(w, h);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbA.fbo);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbB.fbo);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    read = 0;
+  }
+
+  function resize(){
+    var cw = window.innerWidth, ch = window.innerHeight;
+    var scale = Math.min(window.devicePixelRatio || 1, 1.25);
+    var w = Math.min(Math.round(cw * scale), 1920);
+    var h = Math.min(Math.round(ch * scale), 1080);
+    if(w === W && h === H) return;
+    W = w; H = h;
+    canvas.width = w;
+    canvas.height = h;
+    ensureFB(w, h);
+  }
+
+  var t0 = performance.now();
+  var renderedOnce = false;
+  var staticFrame = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  function render(now){
+    var t = (now - t0) / 1000;
+    var src = read ? fbA : fbB;
+    var dst = read ? fbB : fbA;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fbo);
+    gl.viewport(0, 0, W, H);
+    gl.useProgram(prog);
+    gl.uniform3f(uRes, W, H, 0);
+    gl.uniform1f(uTime, t);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, src.tex);
+    gl.uniform1i(uCh0, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, fontTex);
+    gl.uniform1i(uCh1, 1);
+    gl.bindVertexArray(vao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, dst.fbo);
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+    gl.blitFramebuffer(0, 0, W, H, 0, 0, W, H, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+    read = read ? 0 : 1;
+  }
+
+  function tick(now){
+    if(!renderedOnce){
+      renderedOnce = true;
+    }
+    try{
+      render(now);
+    }catch(e){
+      window.__renderErr = String(e && e.stack || e);
+      console.error('[shader] render error:', e);
+      return;
+    }
+    if(!staticFrame) requestAnimationFrame(tick);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  document.body.classList.add('shader-on');
+  requestAnimationFrame(tick);
+})();
+</script>
 
 </body>
 </html>
